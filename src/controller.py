@@ -47,6 +47,9 @@ class Route():
         # This method compares the cost of self to that of newRoute.
         # If the newRoute's cost is smaller, update the self's attributes 
         # to those of newRoute and return True.
+        if self.cost >= newRoute.cost:
+            self.cost = newRoute.cost
+            return True
         # Otherwise, return False
         return False
         
@@ -447,6 +450,7 @@ def main(p4info_file_path, bmv2_file_path, routing_info, adj_info, part):
                                 # PART3_TODO: Try to merge routes and update the routing table on success.
                                 # 1. Merge an existing route (routing_Table[entry.addr]) with 
                                 #    newRoute using the mergeRoute method. 
+                                
                                 # 2. If the method returns True, update the ipv4_route table in the data plane.
                                 # * Use prefix_length of 32 for the match_fields parameter of buildTableEntry
                                 # * Specify is_modify=True as the parameter of WriteTableEntry
