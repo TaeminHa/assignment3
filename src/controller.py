@@ -449,20 +449,38 @@ def main(p4info_file_path, bmv2_file_path, routing_info, adj_info, part):
                                 
                                 # PART3_TODO: Try to merge routes and update the routing table on success.
                                 # 1. Merge an existing route (routing_Table[entry.addr]) with 
-                                #    newRoute using the mergeRoute method. 
+                                #    newRoute using the mergeRoute method.
                                 
                                 # 2. If the method returns True, update the ipv4_route table in the data plane.
                                 # * Use prefix_length of 32 for the match_fields parameter of buildTableEntry
                                 # * Specify is_modify=True as the parameter of WriteTableEntry
                                 # 3. If the method returns False, do nothing since there's no update.
-                                pass
+
+                                if(routing_table[entry.addr].mergeRoute(newRoute)):
+                                    table_entry = p4info_helper.buildTableEntry(
+                                    table_name="MyIngress.ipv4_route",
+                                    match_fields={"hdr.ipv4.dstAddr": (entry.addr, 32)}, 
+                                    action_name="MyIngress.forward_to_next_hop",
+                                    action_params={"next_hop": newRoute.nextHopIP}
+                                    )
+                                    s1.WriteTableEntry(table_entry, is_modify=True)
+                                
+                                # false case, do nothing
+
                             else:
                                 # PART3_TODO: Route to a new address, add it.
                                 # 1. Add it to the routing_table dictionary using 
                                 # entry.addr as a key and new Route as a value.
                                 # 2. Insert a table entry to the ipv4_route table in the data plane. 
                                 # * Use prefix_length of 32 for the match_fields parameter of buildTableEntry
-                                pass
+                                routing_table[entry.addr] = newRoute
+                                table_entry = p4info_helper.buildTableEntry(
+                                    table_name="MyIngress.ipv4_route",
+                                    match_fields={"hdr.ipv4.dstAddr": (entry.addr, 32)},
+                                    action_name="MyIngress.forward_to_next_hop",
+                                    action_params={"next_hop": newRoute.nextHopIP}
+                                )
+                                s1.WriteTableEntry(table_entry)
                                 
                         dump_routing_table()
 
