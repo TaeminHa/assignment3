@@ -310,6 +310,7 @@ control MyIngress(inout headers hdr,
     
         /* 4. Swap src and dst MAC addresses */
         macAddr_t smac = hdr.ethernet.srcAddr;
+        macAddr_t dmac = hdr.ethernet.dstAddr;
         hdr.ethernet.srcAddr = dmac;
         hdr.ethernet.dstAddr = smac;
 
@@ -457,7 +458,7 @@ control MyIngress(inout headers hdr,
         if (hdr.ipv4.ttl == 1) {
             /* PART1_TODO: send ICMP time exceeded message */
             /* 1. Send the ICMP time exceeded msg using action send_ICMP_error */
-            send_ICMP_error();
+            send_ICMP_error(ICMP_TYPE_TIME_EXCEEDED, 0);
             /* 2. Set the source IP address to the IP of the ingress port
                   using table icmp_ingerss_port_ip */
             icmp_ingress_port_ip.apply();
@@ -474,7 +475,7 @@ control MyIngress(inout headers hdr,
             /* 2. Else if the packet is TCP or UDP packet, */
             /* send an ICMP port unreachable msg using action send_ICMP_error */  
             else if (hdr.tcp.isValid() || hdr.udp.isValid()) {
-                send_ICMP_error();
+                send_ICMP_error(ICMP_TYPE_DEST_UNREACHABLE, ICMP_CODE_PORT_UNREACHABLE);
             }
             /* 3. Otherwise, drop the packet */
             else  {
